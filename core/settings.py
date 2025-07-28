@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'contact',
@@ -67,6 +68,14 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
+# Allow localhost for development
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8080"
+    "https://bguerradev-portfolio-backend.onrender.com"
+    # Add your Render backend URL or Android app origin if needed
+]
 
 CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo. En producción, usa CORS_ALLOWED_ORIGINS
 

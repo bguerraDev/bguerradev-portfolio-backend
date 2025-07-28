@@ -9,14 +9,11 @@ from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .firebase import db
 from rest_framework_simplejwt.tokens import RefreshToken
+import logging
 
 
-class TempUser:
-    def __init__(self, username):
-        self.username = username
-        self.id = username  # necesario para JWTAuthentication
-        self.is_active = True  # requerido por SimpleJWT
-        self.is_authenticated = True  # requerido por JWT backend
+# Set up logging for debugging
+logger = logging.getLogger(__name__)
 
 
 class LoginView(APIView):
@@ -24,33 +21,70 @@ class LoginView(APIView):
         username = request.data.get("username")
         password = request.data.get("password")
 
+        # Validate input
         if not username or not password:
-            return Response({"detail": "username and password required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Username and password are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        users_ref = db.collection("users")
-        query = users_ref.where("username", "==", username).limit(1).get()
+        try:
+            # Query Firestore for user
+            users_ref = db.collection("users")
+            query = users_ref.where(
+                "username", "==", username).limit(1).stream()
 
-        if not query:
-            return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
+            # Check if user exists
+            user_doc = next(query, None)
+            if not user_doc:
+                logger.warning(
+                    f"Login attempt failed: User '{username}' not found.")
+                return Response(
+                    {"detail": "Invalid credentials."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
 
-        user_doc = query[0]
-        user_data = user_doc.to_dict()
-        stored_hash = user_data.get("password")
+            # Get user data and verify password
+            user_data = user_doc.to_dict()
+            stored_hash = user_data.get("password")
+            if not stored_hash or not check_password(password, stored_hash):
+                logger.warning(
+                    f"Login attempt failed: Invalid password for user '{username}'.")
+                return Response(
+                    {"detail": "Invalid credentials."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
 
-        if not check_password(password, stored_hash):
-            return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
+            # Create temporary user for JWT
+            class TempUser:
+                def __init__(self, username):
+                    self.username = username
+                    self.id = username  # Used for JWT claim
+                    self.is_active = True  # Required by SimpleJWT
+                    self.is_authenticated = True  # Ensure compatibility with authentication checks
 
-        # ✅ Usamos usuario temporal compatible con JWT
-        user = TempUser(username)
+            user = TempUser(username)
 
-        refresh = RefreshToken.for_user(user)
-        refresh["username"] = username
+            # Generate tokens
+            refresh = RefreshToken.for_user(user)
+            refresh["username"] = username  # Add custom claim
 
-        return Response({
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "detail": "Login successful!"
-        }, status=status.HTTP_200_OK)
+            logger.info(f"User '{username}' logged in successfully.")
+            return Response(
+                {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "detail": "Login successful!"
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            logger.error(f"Error during login for user '{username}': {str(e)}")
+            return Response(
+                {"detail": "An error occurred during login."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class ContactMessageView(APIView):
