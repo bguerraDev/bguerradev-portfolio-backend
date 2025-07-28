@@ -8,8 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .firebase import db
-import datetime
-import jwt
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class LoginView(APIView):
@@ -33,17 +32,20 @@ class LoginView(APIView):
         if not check_password(password, stored_hash):
             return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Generar JWT manual
-        payload = {
-            "username": username,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
-            "iat": datetime.datetime.utcnow()
-        }
+        # ✅ Generar token estilo SimpleJWT con usuario ficticio
+        class TempUser:
+            def __init__(self, username):
+                self.username = username
+                self.id = username  # esto genera el claim `id` que requiere JWT
 
-        token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+        user = TempUser(username)
+
+        refresh = RefreshToken.for_user(user)
+        refresh["username"] = username
 
         return Response({
-            "access": token,
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
             "detail": "Login successful!"
         }, status=status.HTTP_200_OK)
 
