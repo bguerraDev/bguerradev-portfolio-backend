@@ -5,7 +5,8 @@ from django.contrib.auth.hashers import check_password
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from .firebase import db  # Asegúrate de que esto esté inicializado correctamente
+from .firebase import db
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class LoginView(APIView):
@@ -29,11 +30,19 @@ class LoginView(APIView):
         if not check_password(password, stored_hash):
             return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response({"detail": "Login successful!"}, status=status.HTTP_200_OK)
+        # Generar token JWT manualmente
+        refresh = RefreshToken.for_user(None)
+        refresh["username"] = username
+
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "detail": "Login successful!"
+        }, status=status.HTTP_200_OK)
 
 
 class ContactMessageView(APIView):
-    permission_classes = [permissions.IsAuthenticated]  # JWT en el futuro
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         data = request.data
