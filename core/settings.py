@@ -27,7 +27,10 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = ['*']  # Render
+ALLOWED_HOSTS = [
+    'bguerradev-portfolio-backend.onrender.com',
+    'localhost',
+]
 
 # Firebase config
 FIREBASE_CREDENTIAL = {
