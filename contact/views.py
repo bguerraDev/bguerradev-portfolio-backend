@@ -11,6 +11,14 @@ from .firebase import db
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+class TempUser:
+    def __init__(self, username):
+        self.username = username
+        self.id = username  # necesario para JWTAuthentication
+        self.is_active = True  # requerido por SimpleJWT
+        self.is_authenticated = True  # requerido por JWT backend
+
+
 class LoginView(APIView):
     def post(self, request):
         username = request.data.get("username")
@@ -32,12 +40,7 @@ class LoginView(APIView):
         if not check_password(password, stored_hash):
             return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # ✅ Generar token estilo SimpleJWT con usuario ficticio
-        class TempUser:
-            def __init__(self, username):
-                self.username = username
-                self.id = username  # esto genera el claim `id` que requiere JWT
-
+        # ✅ Usamos usuario temporal compatible con JWT
         user = TempUser(username)
 
         refresh = RefreshToken.for_user(user)
