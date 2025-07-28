@@ -72,7 +72,6 @@ CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo. En producción, usa CORS_
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
