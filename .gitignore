@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Django static files
+staticfiles/
+static/
+
+# Django migrations
+**/migrations/
+!*/migrations/__init__.py
+
+# Logs
+*.log
+
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.tox/
+.nox/
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Environment variables
+.env
+.env.*
+
+# Firebase credentials
+*.json
+firebase.json
+
+# Local databases
+db.sqlite3
+*.sqlite3
+
+# VSCode settings (optional)
+.vscode/
+
+# Mac system files
+.DS_Store
+
+# Python virtual environment
+venv/
+ENV/
+env/
