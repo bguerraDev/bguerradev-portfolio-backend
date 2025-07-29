@@ -6,10 +6,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.tokens import RefreshToken
 from .firebase import db
-from .models import CustomUser
 import logging
+from .models import CustomUser
+from rest_framework_simplejwt.tokens import RefreshToken
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +41,14 @@ class LoginView(APIView):
                 return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
 
             # Generate tokens using a mock user or username
-            from rest_framework_simplejwt.tokens import RefreshToken
-            refresh = RefreshToken()
+            # Intenta obtener o crear usuario
+            try:
+                user = CustomUser.objects.get(username=username)
+            except CustomUser.DoesNotExist:
+                user = CustomUser.objects.create_user(username=username, password=password)
+
+            # Generar token JWT
+            refresh = RefreshToken.for_user(user)
             refresh["username"] = username
             refresh.set_exp()  # Set expiration manually if needed
 
