@@ -27,10 +27,7 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = [
-    'bguerradev-portfolio-backend.onrender.com',
-    'localhost',
-]
+AUTH_USER_MODEL = 'contact.CustomUser'
 
 # Firebase config
 FIREBASE_CREDENTIAL = {
@@ -69,10 +66,15 @@ REST_FRAMEWORK = {
     )
 }
 
+ALLOWED_HOSTS = [
+    'bguerradev-portfolio-backend.onrender.com',
+    'localhost',
+]
+
 # Allow localhost for development
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://localhost:8080"
+    "http://localhost:8080",
     "https://bguerradev-portfolio-backend.onrender.com"
     # Add your Render backend URL or Android app origin if needed
 ]

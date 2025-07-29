@@ -4,6 +4,8 @@ services:
     env: python
     buildCommand: |
       pip install -r requirements.txt
+      python manage.py migrate
+      python manage.py sync_firestore_users
       python manage.py collectstatic --noinput
     startCommand: gunicorn core.wsgi:application
     envVars:

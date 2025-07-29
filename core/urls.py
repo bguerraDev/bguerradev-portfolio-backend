@@ -19,8 +19,13 @@ from contact.views import LoginView, ContactMessageView, MessageListView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
 from django.urls import path
+from django.http import HttpResponse
+
+def health_check(request):
+    return HttpResponse("OK", status=200)
 
 urlpatterns = [
+    path('', health_check, name='health-check'),
     path('api/login/', LoginView.as_view(), name='api-login'),
     path('api/contact/', ContactMessageView.as_view(), name='contact-message'), # POST sin auth
     path('api/messages/', MessageListView.as_view(), name='message-list'), # GET con auth
