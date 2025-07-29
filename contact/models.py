@@ -1,30 +1,21 @@
-from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db import models
+from django.contrib.auth.models import PermissionsMixin
 from .firebase import db
 from django.contrib.auth.hashers import make_password
 
-
-class CustomUserManager(BaseUserManager):
+class CustomUserManager:
     def create_user(self, username, password, **extra_fields):
         if not username:
             raise ValueError("The Username field must be set")
-        user_data = {"username": username,
-                     "password": make_password(password), **extra_fields}
-        db.collection("users").document().set(
-            user_data)  # Store in Firestore
-        return self._create_django_user(username, **extra_fields)
+        user_data = {"username": username, "password": make_password(password), **extra_fields}
+        db.collection("users").document().set(user_data)
+        return {"username": username, "id": db.collection("users").document().id}  # Return a mock object or ID
 
-    def _create_django_user(self, username, **extra_fields):
-        user = self.model(username=username, **extra_fields)
-        user.save(using=self._db)
-        return user
+    # Remove _create_django_user since we’re not using Django’s ORM
 
-
-class CustomUser(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=150, unique=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
+class CustomUser:
+    username = None  # Remove field since it’s stored in Firestore
+    is_active = None
+    is_staff = None
 
     objects = CustomUserManager()
 
@@ -32,14 +23,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.username
+        return self.username or "Unknown"
 
-
-class Message(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
-    message = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+class Message:
+    name = None
+    email = None
+    message = None
+    timestamp = None
 
     def __str__(self):
         return f"{self.name} - {self.email}"

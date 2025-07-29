@@ -20,64 +20,42 @@ class LoginView(APIView):
         password = request.data.get("password")
 
         if not username or not password:
-            return Response(
-                {"detail": "Username and password are required."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "Username and password are required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Query Firestore for user
             users_ref = db.collection("users")
-            query = users_ref.where(filter=firestore.FieldFilter(
-                "username", "==", username)).limit(1).stream()
-
+            query = users_ref.where(
+                "username", "==", username).limit(1).stream()
             user_doc = next(query, None)
 
             if not user_doc:
                 logger.warning(
                     f"Login attempt failed: User '{username}' not found.")
-                return Response(
-                    {"detail": "Invalid credentials."},
-                    status=status.HTTP_401_UNAUTHORIZED
-                )
+                return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
 
             user_data = user_doc.to_dict()
             stored_hash = user_data.get("password")
             if not stored_hash or not check_password(password, stored_hash):
                 logger.warning(
                     f"Login attempt failed: Invalid password for user '{username}'.")
-                return Response(
-                    {"detail": "Invalid credentials."},
-                    status=status.HTTP_401_UNAUTHORIZED
-                )
+                return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
 
-            # Get or create Django user
-            try:
-                user = CustomUser.objects.get(username=username)
-            except CustomUser.DoesNotExist:
-                user = CustomUser.objects.create_user(
-                    username=username, password=password)
-
-            # Generate tokens
-            refresh = RefreshToken.for_user(user)
+            # Generate tokens using a mock user or username
+            from rest_framework_simplejwt.tokens import RefreshToken
+            refresh = RefreshToken()
             refresh["username"] = username
+            refresh.set_exp()  # Set expiration manually if needed
 
             logger.info(f"User '{username}' logged in successfully.")
-            return Response(
-                {
-                    "refresh": str(refresh),
-                    "access": str(refresh.access_token),
-                    "detail": "Login successful!"
-                },
-                status=status.HTTP_200_OK
-            )
+            return Response({
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "detail": "Login successful!"
+            }, status=status.HTTP_200_OK)
 
         except Exception as e:
             logger.error(f"Error during login for user '{username}': {str(e)}")
-            return Response(
-                {"detail": "An error occurred during login."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({"detail": "An error occurred during login."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ContactMessageView(APIView):
