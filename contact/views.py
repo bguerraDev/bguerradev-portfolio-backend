@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 class DummyUser:
     def __init__(self, username):
         self.username = username
-        self.pk = username  # Used as unique identifier for JWT
+        self.pk = username
+        self.id = username  # ✅ NECESARIO para JWT
         self.is_active = True
         self.is_authenticated = True
 
