@@ -75,7 +75,7 @@ class FirestoreLoginView(APIView):
                         return Response({
                             'refresh': str(refresh),
                             'access': str(refresh.access_token),
-                        }, content_type="application/json")
+                        })
                     except Exception as e:
                         logger.error(
                             f"Token generation error for user {username}: {str(e)}")
@@ -150,6 +150,8 @@ class MessageListView(APIView):
 
             # ✅ Seguridad: manejar correctamente si user no tiene username
             username = getattr(request.user, "username", "anonymous")
+            logger.info(f"request.user: {request.user} (type: {type(request.user)})") # temp
+            logger.info(f"request.auth: {request.auth}") # temp
             logger.info(f"User {username} fetched {len(messages)} messages")
 
             return Response(messages, status=status.HTTP_200_OK)
