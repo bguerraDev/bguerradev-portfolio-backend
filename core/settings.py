@@ -27,8 +27,6 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-AUTH_USER_MODEL = 'contact.CustomUser'
-
 # Firebase config
 FIREBASE_CREDENTIAL = {
     "type": config("FIREBASE_TYPE"),
@@ -55,16 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
     'contact',
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
-}
 
 ALLOWED_HOSTS = [
     'bguerradev-portfolio-backend.onrender.com',
@@ -79,7 +69,8 @@ CORS_ALLOWED_ORIGINS = [
     # Add your Render backend URL or Android app origin if needed
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo. En producción, usa CORS_ALLOWED_ORIGINS
+# Solo para desarrollo. En producción, usa CORS_ALLOWED_ORIGINS
+CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

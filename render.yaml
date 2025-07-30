@@ -2,10 +2,7 @@ services:
   - type: web
     name: bguerradev-portfolio-backend
     env: python
-    buildCommand: |
-      pip install -r requirements.txt
-      python manage.py makemigrations
-      python manage.py sync_firestore_users
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn core.wsgi:application
     envVars:
       - key: DJANGO_SETTINGS_MODULE
