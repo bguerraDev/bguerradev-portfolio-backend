@@ -53,8 +53,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
     'contact',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 ALLOWED_HOSTS = [
     'bguerradev-portfolio-backend.onrender.com',
@@ -70,7 +77,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # Solo para desarrollo. En producción, usa CORS_ALLOWED_ORIGINS
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
