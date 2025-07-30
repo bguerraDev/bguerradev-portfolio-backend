@@ -8,26 +8,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
 from firebase_admin import firestore
 from .firebase import db
+from .dummy_user import DummyUser
 
 # Configure logger
 logger = logging.getLogger(__name__)
-
-
-class DummyUser:
-    def __init__(self, username):
-        self.username = username
-        self.pk = username
-        self.id = username  # ✅ NECESARIO para JWT
-        self.is_active = True
-        self.is_authenticated = True
-
-    def __str__(self):
-        return self.username
-
-    @property
-    def is_anonymous(self):
-        return False
-
 
 class FirestoreLoginView(APIView):
     def post(self, request):
